@@ -1,0 +1,17 @@
+node_modules/
+coverage/
+.nyc_output/
+dist/
+test/
+.idea
+docs/
+.vscode/
+src/
+test/
+.eslintrc
+tsconfig.json
+.editorconfig
+.nycrc
+.github/
+.vscode/
+.DS_Store

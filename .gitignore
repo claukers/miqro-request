@@ -1,0 +1,13 @@
+node_modules/
+coverage/
+.nyc_output/
+*.log
+bla.sh
+log.txt
+dist/
+test/data/*.log
+.idea
+#.vscode/
+test-dist/
+test-OLD/
+.DS_Store
