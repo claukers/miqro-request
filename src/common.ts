@@ -198,6 +198,7 @@ export interface RequestOptions {
   followRedirect?: boolean;
   disableUserAgent?: true;
   maxRedirects?: number;
+  rejectUnauthorized?: boolean;
   maxResponse?: number;
   locations?: string[];
   timeout?: number;

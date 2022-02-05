@@ -73,6 +73,7 @@ export const request = (options: RequestOptions, logger?: {
               agent: false,
               path: `${parsed.pathname}${parsed.queryStr ? `?${parsed.queryStr}` : ""}${parsed.hash ? parsed.hash : ""}`,
               method: options.method,
+              rejectUnauthorized: options.rejectUnauthorized,
               socketPath: options.socketPath,
               headers: options.disableUserAgent ? {
                 ["Content-Length"]: contentLength,
