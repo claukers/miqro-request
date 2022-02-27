@@ -1,9 +1,13 @@
 import {CONTENT_TYPE_HEADER, JSON_TYPE, RequestOptions, RequestResponse, ResponseError, TEXT_TYPE} from "./common";
+import {newURL} from "./helpers";
 
 export async function request(args: RequestOptions, logger?: {
   error: (...args: any) => void;
   debug: (...args: any) => void;
 } | Console): Promise<RequestResponse> {
+  let url = args.url;
+  /* eslint-disable  @typescript-eslint/ban-ts-comment */
+  // @ts-ignore
   const headers = new Headers();
   const argHeaders = args.headers ? args.headers : {};
   if (args.headers) {
@@ -29,7 +33,25 @@ export async function request(args: RequestOptions, logger?: {
   }
   args.data = args.data ? JsonStringify ? JSON.stringify(args.data) : args.data : undefined;
 
-  const response = await fetch(args.url, {
+  if (args.query) {
+    const urlO = newURL(args.url);
+    const queryNames = Object.keys(args.query);
+    for (const name of queryNames) {
+      const value = args.query[name];
+      if(value instanceof  Array) {
+        for(const qV of value) {
+          urlO.searchParams.append(name, qV as any);
+        }
+      } else {
+        urlO.searchParams.append(name, value as any);
+      }
+    }
+    url = urlO.toString();
+  }
+
+  /* eslint-disable  @typescript-eslint/ban-ts-comment */
+  // @ts-ignore
+  const response = await fetch(url, {
     headers,
     body: args.data,
     method: args.method ? args.method : "GET",
@@ -41,20 +63,23 @@ export async function request(args: RequestOptions, logger?: {
   });
 
   const responseHeaders: any = {};
-  response.headers.forEach((val, key) => {
+  response.headers.forEach((val: string, key: string) => {
     responseHeaders[val] = key;
   });
 
   const status = response.status;
-  const url = response.url;
 
   const buffer = await response.arrayBuffer() as any;
   let data;
   const contentType = response.headers.get("content-type");
   if (contentType && (contentType.indexOf("json") !== -1)) {
+    /* eslint-disable  @typescript-eslint/ban-ts-comment */
+    // @ts-ignore
     const decoder = new TextDecoder("utf-8");
     data = JSON.parse(decoder.decode(new Uint8Array(buffer)));
   } else if (contentType && (contentType.indexOf("text") !== -1)) {
+    /* eslint-disable  @typescript-eslint/ban-ts-comment */
+    // @ts-ignore
     const decoder = new TextDecoder("utf-8");
     data = decoder.decode(new Uint8Array(buffer));
   }

@@ -21,6 +21,6 @@ console.dir(await request({
 
 ## browser bundle ( not recommended )
 
-if you use the module in the browser the ```request``` function will use the built-in ```fetch``` function instead of the native ```http``` module. 
+if you use the module in the browser the ```request``` function will use the built-in ```fetch``` function instead of the native nodejs ```http``` module. 
 
 Tested with ```webpack's``` vanilla configuration.
