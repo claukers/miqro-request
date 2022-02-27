@@ -21,8 +21,8 @@ const getLogger = (identifer) => {
 
 let server;
 let serverPort;
-const SOCKET_PATH = "/tmp/socket.1111";
-const PORT = 8080;
+const SOCKET_PATH = "/tmp/socket.2222";
+const PORT = 6363;
 
 const before = async () => {
 
@@ -177,7 +177,7 @@ it('simple get follow redirect 400', async () => {
   console.log("gads");
   try {
     await request({
-      url: "http://localhost:8080/redirect400",
+      url: "http://localhost:6363/redirect400",
       method: "get",
       followRedirect: true
     }, getLogger("test"));
@@ -185,8 +185,8 @@ it('simple get follow redirect 400', async () => {
   } catch (e) {
     strictEqual((e).message, "request ended with status [400]");
     strictEqual((e).status, 400);
-    strictEqual((e).locations[0], "http://localhost:8080/redirect400");
-    strictEqual((e).locations[1], "http://localhost:8080/400");
+    strictEqual((e).locations[0], "http://localhost:6363/redirect400");
+    strictEqual((e).locations[1], "http://localhost:6363/400");
     console.error(e);
   }
 
@@ -196,16 +196,16 @@ it('simple get follow redirect loop2', async () => {
 
   console.log("gads");
   const { url, redirectedUrl, status, data, locations } = await request({
-    url: "http://localhost:8080/redirectLoop2",
+    url: "http://localhost:6363/redirectLoop2",
     method: "get",
     followRedirect: true
   }, getLogger("test"));
   strictEqual(status, 200);
-  strictEqual(redirectedUrl, "http://localhost:8080/hello?format=txt&otherQ=3");
-  strictEqual(locations[0], "http://localhost:8080/redirectLoop2");
-  strictEqual(locations[1], "http://localhost:8080/redirectNoHostHandler");
+  strictEqual(redirectedUrl, "http://localhost:6363/hello?format=txt&otherQ=3");
+  strictEqual(locations[0], "http://localhost:6363/redirectLoop2");
+  strictEqual(locations[1], "http://localhost:6363/redirectNoHostHandler");
   strictEqual(locations[2], redirectedUrl);
-  strictEqual(url, "http://localhost:8080/redirectLoop2");
+  strictEqual(url, "http://localhost:6363/redirectLoop2");
   strictEqual(data, "hello2");
 
 }, testOptions);
@@ -214,17 +214,17 @@ it('simple get follow redirect loop2 with max redirect 2', async () => {
 
   console.log("gads");
   const { url, redirectedUrl, status, data, locations } = await request({
-    url: "http://localhost:8080/redirectLoop2",
+    url: "http://localhost:6363/redirectLoop2",
     method: "get",
     followRedirect: true,
     maxRedirects: 2
   }, getLogger("test"));
   strictEqual(status, 200);
-  strictEqual(redirectedUrl, "http://localhost:8080/hello?format=txt&otherQ=3");
-  strictEqual(locations[0], "http://localhost:8080/redirectLoop2");
-  strictEqual(locations[1], "http://localhost:8080/redirectNoHostHandler");
+  strictEqual(redirectedUrl, "http://localhost:6363/hello?format=txt&otherQ=3");
+  strictEqual(locations[0], "http://localhost:6363/redirectLoop2");
+  strictEqual(locations[1], "http://localhost:6363/redirectNoHostHandler");
   strictEqual(locations[2], redirectedUrl);
-  strictEqual(url, "http://localhost:8080/redirectLoop2");
+  strictEqual(url, "http://localhost:6363/redirectLoop2");
   strictEqual(data, "hello2");
 
 }, testOptions);
@@ -234,7 +234,7 @@ it('simple get follow redirect loop2 with max redirect 1', async () => {
   console.log("gads");
   try {
     await request({
-      url: "http://localhost:8080/redirectLoop2",
+      url: "http://localhost:6363/redirectLoop2",
       method: "get",
       followRedirect: true,
       maxRedirects: 1
@@ -259,7 +259,7 @@ it('simple get follow redirect max redirects', async () => {
       maxRedirects: 1
     });
     strictEqual(status, 200);
-    strictEqual(redirectedUrl, "http://localhost:8080/hello?format=txt&otherQ=2");
+    strictEqual(redirectedUrl, "http://localhost:6363/hello?format=txt&otherQ=2");
     strictEqual(url, "/redirect");
     strictEqual(data, "hello2");
   } catch (e) {
@@ -294,7 +294,7 @@ it('simple get follow redirect loop', async () => {
   try {
     console.log("gads");
     const { url, redirectedUrl, status, data } = await request({
-      url: "http://localhost:8080/redirectLoop",
+      url: "http://localhost:6363/redirectLoop",
       method: "get",
       followRedirect: true,
       disableThrow: true
@@ -311,7 +311,7 @@ it('timeout ', async () => {
 
   try {
     await request({
-      url: "http://localhost:8080/timeout",
+      url: "http://localhost:6363/timeout",
       method: "POST",
       timeout: 2000
     }, getLogger("test"));
@@ -326,7 +326,7 @@ it('readtimeout ', async () => {
 
   try {
     await request({
-      url: "http://localhost:8080/readtimeout",
+      url: "http://localhost:6363/readtimeout",
       method: "POST",
       timeout: 2000
     }, getLogger("test"));
@@ -341,7 +341,7 @@ it('max response ', async () => {
 
   try {
     await request({
-      url: "http://localhost:8080/hello?format=txt&otherQ=1",
+      url: "http://localhost:6363/hello?format=txt&otherQ=1",
       method: "get",
       maxResponse: 2
     }, getLogger("test"));
@@ -363,7 +363,7 @@ it('simple get follow redirect', async () => {
       followRedirect: true
     }, getLogger("test"));
     strictEqual(status, 200);
-    strictEqual(redirectedUrl, "http://localhost:8080/hello?format=txt&otherQ=2");
+    strictEqual(redirectedUrl, "http://localhost:6363/hello?format=txt&otherQ=2");
     strictEqual(url, "/redirect");
     strictEqual(data, "hello2");
   } catch (e) {
@@ -378,7 +378,7 @@ it('simple get /hello?format=txt happy path', async () => {
   try {
     console.log("gehin");
     const { data, status, buffer, headers } = await request({
-      url: "http://localhost:8080/hello?format=txt&otherQ=1",
+      url: "http://localhost:6363/hello?format=txt&otherQ=1",
       method: "get"
     });
     strictEqual(data, "hello");
@@ -394,7 +394,7 @@ it('simple get /hello?format=txt happy path', async () => {
 it('simple get /hello?format=txt happy path not using util', async () => {
 
   const { data, status } = await request({
-    url: "http://localhost:8080/hello?format=txt&otherQ=1",
+    url: "http://localhost:6363/hello?format=txt&otherQ=1",
     method: "get"
   });
   strictEqual(data, "hello");
@@ -405,7 +405,7 @@ it('simple get /hello?format=txt happy path not using util', async () => {
 it('simple get /hello?format=txt happy path not using util query from options', async () => {
 
   const { data, status } = await request({
-    url: "http://localhost:8080/hello",
+    url: "http://localhost:6363/hello",
     query: {
       format: "txt",
       otherQ: 1
@@ -420,7 +420,7 @@ it('simple get /hello?format=txt happy path not using util query from options', 
 it('simple get /hello?format=txt happy path not using util query from options with hash', async () => {
 
   const { data, status } = await request({
-    url: "http://localhost:8080/hello#hash1",
+    url: "http://localhost:6363/hello#hash1",
     query: {
       format: "txt",
       otherQ: 1
@@ -435,7 +435,7 @@ it('simple get /hello?format=txt happy path not using util query from options wi
 it('simple get /hello?format=txt happy path not using util query from options and url', async () => {
 
   const { data, status } = await request({
-    url: "http://localhost:8080/hello?otherQ=1",
+    url: "http://localhost:6363/hello?otherQ=1",
     query: {
       format: "txt"
     },
@@ -449,7 +449,7 @@ it('simple get /hello?format=txt happy path not using util query from options an
 it('simple get /hello?format=txt happy path not using util query from options and url and hash', async () => {
 
   const { data, status } = await request({
-    url: "http://localhost:8080/hello?otherQ=1#hashs",
+    url: "http://localhost:6363/hello?otherQ=1#hashs",
     query: {
       format: "txt"
     },
@@ -492,7 +492,7 @@ it('cannot get with bad url', async () => {
 it('simple post /hello happy path', async () => {
 
   const { data, status } = await request({
-    url: "http://localhost:8080/post/hello?format=txt&otherQ=1",
+    url: "http://localhost:6363/post/hello?format=txt&otherQ=1",
     method: "POST",
     data: "blo"
   });
@@ -504,7 +504,7 @@ it('simple post /hello happy path', async () => {
 it('simple post /post/sum happy path', async () => {
 
   const resp = await request({
-    url: "http://localhost:8080/post/sum",
+    url: "http://localhost:6363/post/sum",
     method: "POST",
     data: [{ val: 1 }, { val: 2 }]
   });
@@ -516,7 +516,7 @@ it('simple post /post/sum happy path', async () => {
 it('simple post /post/sum happy path with utf-8', async () => {
 
   const resp = await request({
-    url: "http://localhost:8080/post/sum",
+    url: "http://localhost:6363/post/sum",
     method: "POST",
     data: [{ val: 1, ñ: "ññññ" }, { val: 2 }]
   });
@@ -553,7 +553,7 @@ it('simple get /hello?format=txt happy path over unixsocket url act as path', as
 it('simple get /hello?format=json happy path', async () => {
 
   const { data, status } = await request({
-    url: "http://localhost:8080/hello?format=json&otherQ=1",
+    url: "http://localhost:6363/hello?format=json&otherQ=1",
     method: "get"
   });
   strictEqual(data.ble, 2);
@@ -564,7 +564,7 @@ it('simple get /hello?format=json happy path', async () => {
 it('simple get /hello?format=json happy path maxResponse', async () => {
 
   const { data, status } = await request({
-    url: "http://localhost:8080/hello?format=json&otherQ=1",
+    url: "http://localhost:6363/hello?format=json&otherQ=1",
     method: "get",
     maxResponse: 9,
   });
@@ -576,7 +576,7 @@ it('simple get /hello?format=json happy path maxResponse', async () => {
 it('simple get /hello?format=json happy path maxResponse too big', async () => {
   try {
     await request({
-      url: "http://localhost:8080/hello?format=json&otherQ=1",
+      url: "http://localhost:6363/hello?format=json&otherQ=1",
       method: "get",
       maxResponse: 8,
     });
@@ -653,7 +653,7 @@ it('simple get follow redirect with different host and ECONNREFUSED', async () =
 
   try {
     await request({
-      url: "http://localhost:8080/redirectWithDifferentHostHandler",
+      url: "http://localhost:6363/redirectWithDifferentHostHandler",
       method: "get",
       followRedirect: true
     });
@@ -663,8 +663,8 @@ it('simple get follow redirect with different host and ECONNREFUSED', async () =
     strictEqual(status, undefined);
     strictEqual(code, "ECONNREFUSED");
     strictEqual(name, "ResponseConnectionRefusedError");
-    strictEqual(redirectedUrl, "http://localhost:8081/hello?format=txt&otherQ=4");
-    strictEqual(url, "http://localhost:8080/redirectWithDifferentHostHandler");
+    strictEqual(redirectedUrl, "http://localhost:6364/hello?format=txt&otherQ=4");
+    strictEqual(url, "http://localhost:6363/redirectWithDifferentHostHandler");
     strictEqual(data, undefined);
   }
 
@@ -695,15 +695,15 @@ it('simple get follow redirect with no host', async () => {
 
   console.log("gads");
   const { url, redirectedUrl, status, data, locations } = await request({
-    url: "http://localhost:8080/redirectNoHostHandler",
+    url: "http://localhost:6363/redirectNoHostHandler",
     method: "get",
     followRedirect: true
   });
   strictEqual(status, 200);
-  strictEqual(redirectedUrl, "http://localhost:8080/hello?format=txt&otherQ=3");
-  strictEqual(locations[0], "http://localhost:8080/redirectNoHostHandler");
+  strictEqual(redirectedUrl, "http://localhost:6363/hello?format=txt&otherQ=3");
+  strictEqual(locations[0], "http://localhost:6363/redirectNoHostHandler");
   strictEqual(locations[1], redirectedUrl);
-  strictEqual(url, "http://localhost:8080/redirectNoHostHandler");
+  strictEqual(url, "http://localhost:6363/redirectNoHostHandler");
   strictEqual(data, "hello2");
 
 }, testOptions);
@@ -711,7 +711,7 @@ it('simple get follow redirect with no host', async () => {
 /*it('simple get /compressHello?format=txt with gzip encoding happy path over unixsocket url act as path', async () => {
   
     const { data, status, headers, buffer } = await request({
-      url: "http://localhost:8080/compressHello?format=txt&otherQ=1",
+      url: "http://localhost:6363/compressHello?format=txt&otherQ=1",
       method: "get",
       headers: {
         ["Accept-Encoding"]: "gzip"

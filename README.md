@@ -5,7 +5,7 @@
 ```typescript
 import { request } from "@miqro/request";
 
-const response = await request({
+console.dir(await request({
 	url: ...,
 	query: {
 		...
@@ -16,5 +16,11 @@ const response = await request({
 	},
 	data: ...,
 	...
-})
+}))
 ```
+
+## browser bundle ( not recommended )
+
+if you use the module in the browser the ```request``` function will use the built-in ```fetch``` function instead of the native ```http``` module. 
+
+Tested with ```webpack's``` vanilla configuration.

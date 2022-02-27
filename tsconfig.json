@@ -5,14 +5,14 @@
   },
   "compileOnSave": true,
   "compilerOptions": {
-    "lib": ["es2021"],
+    "lib": ["dom","es2021"],
     "module": "commonjs",
     "moduleResolution": "node",
     "target": "es2021",
     "outDir": "./dist/",
     "removeComments": false,
     "noImplicitAny": true,
-    "sourceMap": false,
+    "sourceMap": true,
     "declaration": true,
     "strict": true
   },
