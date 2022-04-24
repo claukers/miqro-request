@@ -9,11 +9,12 @@
     "prebuild": "rm -Rf dist/;",
     "build": "tsc",
     "pretest": "npm run build",
-    "test": "node test/request.test.js"
+    "test": "miqro-test test/request.test.js"
   },
   "author": "claukers",
   "license": "ISC",
   "devDependencies": {
+    "@miqro/test": "0.2.0",
     "@types/node": "17.0.23",
     "typescript": "4.6.3"
   }
