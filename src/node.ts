@@ -1,5 +1,5 @@
-import { ClientRequest, IncomingMessage, request as httpRequest } from "http";
-import { request as httpsRequest } from "https";
+import {ClientRequest, IncomingMessage, request as httpRequest} from "http";
+import {request as httpsRequest} from "https";
 import {
   parseRedirectLocation,
   RequestOptions,
@@ -8,8 +8,8 @@ import {
   readResponseBuffer,
   CONTENT_TYPE_HEADER, JSON_TYPE, TEXT_TYPE, DEFAULT_USER_AGENT
 } from "./common";
-import { gunzipSync } from "zlib";
-import { isBrowser } from "./helpers";
+import {gunzipSync} from "zlib";
+import {isBrowser} from "./helpers";
 
 export const request = (options: RequestOptions, logger?: {
   error: (...args: any) => void;
@@ -21,7 +21,7 @@ export const request = (options: RequestOptions, logger?: {
     return new Promise((resolve, reject) => {
       try {
         if (!options.headers) {
-          options.headers = {};
+          options.headers =Object.create(null) as {};
         }
         if (typeof options.maxRedirects === "undefined") {
           options.maxRedirects = 10;

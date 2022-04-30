@@ -9,7 +9,7 @@ export async function request(args: RequestOptions, logger?: {
   /* eslint-disable  @typescript-eslint/ban-ts-comment */
   // @ts-ignore
   const headers = new Headers();
-  const argHeaders = args.headers ? args.headers : {};
+  const argHeaders = args.headers ? args.headers : Object.create(null);
   if (args.headers) {
     const names = Object.keys(args.headers);
     for (const name of names) {
