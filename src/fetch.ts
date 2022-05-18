@@ -54,6 +54,7 @@ export async function request(args: RequestOptions, logger?: {
   const response = await fetch(url, {
     headers,
     body: args.data,
+    keepalive: false,
     method: args.method ? args.method : "GET",
     cache: "no-cache",
     redirect: args.followRedirect ? "follow" : "error",

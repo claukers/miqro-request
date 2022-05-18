@@ -21,7 +21,7 @@ export const request = (options: RequestOptions, logger?: {
     return new Promise((resolve, reject) => {
       try {
         if (!options.headers) {
-          options.headers =Object.create(null) as {};
+          options.headers = Object.create(null) as {};
         }
         if (typeof options.maxRedirects === "undefined") {
           options.maxRedirects = 10;
@@ -49,6 +49,10 @@ export const request = (options: RequestOptions, logger?: {
         if (!parsed.socketPath && !parsed.hostname) {
           throw new Error(`Bad url ${options.url}`);
         }
+
+        delete options.headers["connection"];
+        delete options.headers["keep-alive"];
+
         switch (parsed.protocol) {
           case "https:":
           case "http:":
