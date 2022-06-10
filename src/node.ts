@@ -31,9 +31,9 @@ export const request = (options: RequestOptions, logger?: {
         const isJSONType = contentType ? contentType.toString().toLocaleLowerCase().indexOf("application/json") === 0 : undefined;
 
         const noType = !contentType;
-
+        const isBuffer: boolean = options.data instanceof Buffer;
         const isText: boolean = typeof options.data === "string";
-        const JsonStringify: boolean = (!isText && (noType || isJSONType as boolean));
+        const JsonStringify: boolean = (!isBuffer && !isText && (noType || isJSONType as boolean));
 
         if (JsonStringify && noType) {
           options.headers["Content-Type"] = JSON_TYPE;

@@ -24,7 +24,8 @@ export async function request(args: RequestOptions, logger?: {
   const noType = !requestContentType;
 
   const isText: boolean = typeof args.data === "string";
-  const JsonStringify: boolean = (!isText && (noType || isJSONType as boolean));
+  const isBuffer: boolean = args.data instanceof Buffer;
+  const JsonStringify: boolean = (!isBuffer && !isText && (noType || isJSONType as boolean));
 
   if (JsonStringify && noType) {
     headers.set("Content-Type", JSON_TYPE);

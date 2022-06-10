@@ -9,7 +9,7 @@
     "prebuild": "rm -Rf dist/;",
     "build": "tsc",
     "pretest": "npm run build",
-    "test": "miqro-test test/request.test.js"
+    "test": "miqro-test -r test/ -n "
   },
   "author": "claukers",
   "license": "ISC",
