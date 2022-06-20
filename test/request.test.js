@@ -35,11 +35,7 @@ describe("request func tests", () => {
       for (const r of ctx.body) {
         ret += r.val;
       }
-      ctx.end({
-        status: 200,
-        headers: {},
-        body: `${ret}`
-      });
+      ctx.text(`${ret}`);
     };
     const helloHandler = async (ctx) => {
       const format = ctx.query.format;
@@ -52,26 +48,14 @@ describe("request func tests", () => {
       }
 
       if (otherQ !== "1" && otherQ !== "2" && otherQ !== "3" && otherQ !== "4") {
-        ctx.end({
-          status: 503,
-          headers: {},
-          body: "not valid otherQ [" + ctx.query.otherQ + "]"
-        });
+        ctx.text("not valid otherQ [" + ctx.query.otherQ + "]", {}, 503);
       } else {
         switch (format) {
           case "txt":
             if (otherQ !== "1") {
-              ctx.end({
-                status: 200,
-                headers: {},
-                body: "hello2"
-              });
+              ctx.text("hello2");
             } else {
-              ctx.end({
-                status: 200,
-                headers: {},
-                body: "hello"
-              });
+              ctx.text("hello");
             }
             break;
           case "json":
@@ -80,11 +64,7 @@ describe("request func tests", () => {
             });
             break;
           default:
-            ctx.end({
-              status: 400,
-              headers: {},
-              body: "not valid format [" + ctx.query.format + "]"
-            });
+            ctx.text("not valid format [" + ctx.query.format + "]", {}, 400);
         }
       }
     };

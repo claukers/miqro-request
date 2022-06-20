@@ -101,11 +101,13 @@ export const request = (options: RequestOptions, logger?: {
               try {
                 const responseBuffer: Buffer = res.headers["content-encoding"] === "gzip" && !isBrowser() ?
                   gunzipSync(Buffer.concat(buffers)) : Buffer.concat(buffers);
-                let data: any = responseBuffer.toString();
+                let data: any;
 
                 const contentType = res.headers["content-type"];
-                if (contentType && data && (contentType.indexOf("json") !== -1)) {
+                if (contentType && (contentType.indexOf("json") !== -1)) {
                   data = JSON.parse(responseBuffer.toString());
+                } else if (contentType && (contentType.indexOf("text") !== -1)) {
+                  data = responseBuffer.toString();
                 }
 
                 const status = res.statusCode;
