@@ -3,9 +3,9 @@ import { request as httpsRequest } from "https";
 import {
   RequestOptions,
   RequestResponse,
-  ResponseError,
-  CONTENT_TYPE_HEADER, JSON_TYPE, TEXT_TYPE, DEFAULT_USER_AGENT
+  ResponseError
 } from "./common.js";
+import { CONTENT_TYPE_HEADER, JSON_TYPE, TEXT_TYPE, DEFAULT_USER_AGENT } from "./constants.js";
 import { followRedirect, parseData, parseRedirectLocation, readResponseBuffer } from "./utils.js";
 import { gunzipSync } from "zlib";
 import { isBrowser } from "./helpers.js";
