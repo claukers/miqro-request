@@ -1,6 +1,6 @@
 # @miqro/request
 
-## async wrapper for native nodejs http.request and fetch on the browser.
+## async wrapper for native nodejs http.request
 
 ```typescript
 import { request } from "@miqro/request";

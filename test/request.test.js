@@ -1,7 +1,7 @@
-const {existsSync, unlinkSync} = require("fs");
-const {strictEqual} = require("assert");
-const {request} = require("../dist");
-const {DummyApp: App, JSONParser, TextParser} = require("./app");
+const { existsSync, unlinkSync } = require("fs");
+const { strictEqual } = require("assert");
+const { request } = require("../dist");
+const { DummyApp: App, JSONParser, TextParser } = require("./app");
 
 const getLogger = (identifer) => {
   return console;
@@ -81,13 +81,17 @@ describe("request func tests", () => {
     });
     appPort.post("/readtimeout", async (ctx) => {
       return new Promise((resolve) => {
-        ctx.res.write("true");
+        //ctx.res.write("true");
+        console.log("here2");
         setTimeout(async () => {
           try {
+            console.log("here");
             await ctx.text("true");
           } catch (e) {
+            console.dir(e);
             // ctx.logger.error(e);
           }
+          console.log("here3");
           resolve();
         }, 3000);
       })
@@ -133,170 +137,9 @@ describe("request func tests", () => {
       });
     });
   });
-  it('simple get follow redirect 400', async () => {
 
-    console.log("gads");
-    try {
-      await request({
-        url: "http://localhost:6363/redirect400",
-        method: "get",
-        followRedirect: true
-      }, getLogger("test"));
-      strictEqual(true, false);
-    } catch (e) {
-      strictEqual((e).message, "request ended with status [400]");
-      strictEqual((e).status, 400);
-      strictEqual((e).locations[0], "http://localhost:6363/redirect400");
-      strictEqual((e).locations[1], "http://localhost:6363/400");
-      console.error(e);
-    }
 
-  });
 
-  it('simple get follow redirect loop2', async () => {
-
-    console.log("gads");
-    const {url, redirectedUrl, status, data, locations} = await request({
-      url: "http://localhost:6363/redirectLoop2",
-      method: "get",
-      followRedirect: true
-    }, getLogger("test"));
-    strictEqual(status, 200);
-    strictEqual(redirectedUrl, "http://localhost:6363/hello?format=txt&otherQ=3");
-    strictEqual(locations[0], "http://localhost:6363/redirectLoop2");
-    strictEqual(locations[1], "http://localhost:6363/redirectNoHostHandler");
-    strictEqual(locations[2], redirectedUrl);
-    strictEqual(url, "http://localhost:6363/redirectLoop2");
-    strictEqual(data, "hello2");
-
-  });
-
-  it('simple get follow redirect loop2 with max redirect 2', async () => {
-
-    console.log("gads");
-    const {url, redirectedUrl, status, data, locations} = await request({
-      url: "http://localhost:6363/redirectLoop2",
-      method: "get",
-      followRedirect: true,
-      maxRedirects: 2
-    }, getLogger("test"));
-    strictEqual(status, 200);
-    strictEqual(redirectedUrl, "http://localhost:6363/hello?format=txt&otherQ=3");
-    strictEqual(locations[0], "http://localhost:6363/redirectLoop2");
-    strictEqual(locations[1], "http://localhost:6363/redirectNoHostHandler");
-    strictEqual(locations[2], redirectedUrl);
-    strictEqual(url, "http://localhost:6363/redirectLoop2");
-    strictEqual(data, "hello2");
-
-  });
-
-  it('simple get follow redirect loop2 with max redirect 1', async () => {
-
-    console.log("gads");
-    try {
-      await request({
-        url: "http://localhost:6363/redirectLoop2",
-        method: "get",
-        followRedirect: true,
-        maxRedirects: 1
-      }, getLogger("test"));
-      strictEqual(true, false);
-    } catch (e) {
-      strictEqual((e).message.indexOf("too many redirects to"), 0);
-      console.error(e);
-    }
-
-  });
-
-  it('simple get follow redirect max redirects', async () => {
-
-    try {
-      console.log("gads");
-      const {url, redirectedUrl, status, data} = await request({
-        url: "/redirect",
-        method: "get",
-        socketPath: SOCKET_PATH,
-        followRedirect: true,
-        maxRedirects: 1
-      });
-      strictEqual(status, 200);
-      strictEqual(redirectedUrl, "http://localhost:6363/hello?format=txt&otherQ=2");
-      strictEqual(url, "/redirect");
-      strictEqual(data, "hello2");
-    } catch (e) {
-      console.error(e);
-      throw e;
-    }
-
-  });
-
-  it('simple get follow redirect max redirects fails', async () => {
-
-    try {
-      console.log("gads");
-      const {url, redirectedUrl, status, data} = await request({
-        url: "/redirect",
-        method: "get",
-        socketPath: SOCKET_PATH,
-        followRedirect: true,
-        maxRedirects: 0,
-        disableThrow: true
-      }, getLogger("test"));
-      strictEqual(true, false);
-    } catch (e) {
-      strictEqual((e).message.indexOf("too many redirects to"), 0);
-      console.error(e);
-    }
-
-  });
-
-  it('simple get follow redirect loop', async () => {
-
-    try {
-      console.log("gads");
-      const {url, redirectedUrl, status, data} = await request({
-        url: "http://localhost:6363/redirectLoop",
-        method: "get",
-        followRedirect: true,
-        disableThrow: true
-      }, getLogger("test"));
-      strictEqual(true, false);
-    } catch (e) {
-      strictEqual((e).message.indexOf("loop redirect to"), 0);
-      console.error(e);
-    }
-
-  });
-
-  it('timeout ', async () => {
-
-    try {
-      await request({
-        url: "http://localhost:6363/timeout",
-        method: "POST",
-        timeout: 2000
-      }, getLogger("test"));
-      strictEqual(false, true);
-    } catch (e) {
-      strictEqual((e).message, "response timeout 2000");
-    }
-
-  });
-
-  it('readtimeout ', async () => {
-
-    try {
-      await request({
-        url: "http://localhost:6363/readtimeout",
-        method: "POST",
-        timeout: 2000
-      }, getLogger("test"));
-      strictEqual(false, true);
-    } catch (e) {
-      strictEqual((e).message, "response timeout 2000");
-    }
-
-  });
 
   it('max response ', async () => {
 
@@ -316,8 +159,7 @@ describe("request func tests", () => {
   it('simple get follow redirect', async () => {
 
     try {
-      console.log("gads");
-      const {url, redirectedUrl, status, data} = await request({
+      const { url, redirectedUrl, status, data } = await request({
         url: "/redirect",
         method: "get",
         socketPath: SOCKET_PATH,
@@ -337,8 +179,7 @@ describe("request func tests", () => {
   it('simple get /hello?format=txt happy path', async () => {
 
     try {
-      console.log("gehin");
-      const {data, status, buffer, headers} = await request({
+      const { data, status, buffer, headers } = await request({
         url: "http://localhost:6363/hello?format=txt&otherQ=1",
         method: "get"
       });
@@ -354,7 +195,7 @@ describe("request func tests", () => {
 
   it('simple get /hello?format=txt happy path not using util', async () => {
 
-    const {data, status} = await request({
+    const { data, status } = await request({
       url: "http://localhost:6363/hello?format=txt&otherQ=1",
       method: "get"
     });
@@ -365,7 +206,7 @@ describe("request func tests", () => {
 
   it('simple get /hello?format=txt happy path not using util query from options', async () => {
 
-    const {data, status} = await request({
+    const { data, status } = await request({
       url: "http://localhost:6363/hello",
       query: {
         format: "txt",
@@ -380,7 +221,7 @@ describe("request func tests", () => {
 
   it('simple get /hello?format=txt happy path not using util query from options with hash', async () => {
 
-    const {data, status} = await request({
+    const { data, status } = await request({
       url: "http://localhost:6363/hello#hash1",
       query: {
         format: "txt",
@@ -395,7 +236,7 @@ describe("request func tests", () => {
 
   it('simple get /hello?format=txt happy path not using util query from options and url', async () => {
 
-    const {data, status} = await request({
+    const { data, status } = await request({
       url: "http://localhost:6363/hello?otherQ=1",
       query: {
         format: "txt"
@@ -409,7 +250,7 @@ describe("request func tests", () => {
 
   it('simple get /hello?format=txt happy path not using util query from options and url and hash', async () => {
 
-    const {data, status} = await request({
+    const { data, status } = await request({
       url: "http://localhost:6363/hello?otherQ=1#hashs",
       query: {
         format: "txt"
@@ -452,7 +293,7 @@ describe("request func tests", () => {
 
   it('simple post /hello happy path', async () => {
 
-    const {data, status} = await request({
+    const { data, status } = await request({
       url: "http://localhost:6363/post/hello?format=txt&otherQ=1",
       method: "POST",
       data: "blo"
@@ -467,7 +308,7 @@ describe("request func tests", () => {
     const resp = await request({
       url: "http://localhost:6363/post/sum",
       method: "POST",
-      data: [{val: 1}, {val: 2}]
+      data: [{ val: 1 }, { val: 2 }]
     });
     strictEqual(resp.data, "3");
     strictEqual(resp.status, 200);
@@ -479,7 +320,7 @@ describe("request func tests", () => {
     const resp = await request({
       url: "http://localhost:6363/post/sum",
       method: "POST",
-      data: [{val: 1, ñ: "ññññ"}, {val: 2}]
+      data: [{ val: 1, ñ: "ññññ" }, { val: 2 }]
     });
     strictEqual(resp.data, "3");
     strictEqual(resp.status, 200);
@@ -488,7 +329,7 @@ describe("request func tests", () => {
 
   it('simple post /hello happy path over unix socket', async () => {
 
-    const {data, status} = await request({
+    const { data, status } = await request({
       url: "/post/hello?format=txt&otherQ=1",
       method: "POST",
       data: "blo",
@@ -501,7 +342,7 @@ describe("request func tests", () => {
 
   it('simple get /hello?format=txt happy path over unixsocket url act as path', async () => {
 
-    const {data, status} = await request({
+    const { data, status } = await request({
       url: "/hello?format=txt&otherQ=1",
       socketPath: SOCKET_PATH,
       method: "get"
@@ -513,7 +354,7 @@ describe("request func tests", () => {
 
   it('simple get /hello?format=json happy path', async () => {
 
-    const {data, status} = await request({
+    const { data, status } = await request({
       url: "http://localhost:6363/hello?format=json&otherQ=1",
       method: "get"
     });
@@ -524,7 +365,7 @@ describe("request func tests", () => {
 
   it('simple get /hello?format=json happy path maxResponse', async () => {
 
-    const {data, status} = await request({
+    const { data, status } = await request({
       url: "http://localhost:6363/hello?format=json&otherQ=1",
       method: "get",
       maxResponse: 9,
@@ -549,7 +390,7 @@ describe("request func tests", () => {
 
   it('simple get /hello?format=json happy path over unixsocket', async () => {
 
-    const {data, status} = await request({
+    const { data, status } = await request({
       url: "/hello?format=json&otherQ=1",
       socketPath: SOCKET_PATH,
       method: "get"
@@ -562,7 +403,7 @@ describe("request func tests", () => {
   it('simple get /hello?format=txt happy path over unixsocket', async () => {
 
     try {
-      const {data, status, redirectedUrl, locations} = await request({
+      const { data, status, redirectedUrl, locations } = await request({
         url: "/hello?format=txt&otherQ=1",
         socketPath: SOCKET_PATH,
         method: "get"
@@ -586,7 +427,7 @@ describe("request func tests", () => {
       });
       strictEqual(true, false);
     } catch (e) {
-      const {redirectedUrl, data, status, name} = e;
+      const { redirectedUrl, data, status, name } = e;
       strictEqual(name, "ResponseError");
       strictEqual(data, "not valid format [notvalid]");
       strictEqual(status, 400);
@@ -604,7 +445,7 @@ describe("request func tests", () => {
       method: "get",
       disableThrow: true
     });
-    const {redirectedUrl, data, status} = e;
+    const { redirectedUrl, data, status } = e;
     strictEqual(data, "not valid format [notvalid]");
     strictEqual(status, 400);
     strictEqual(redirectedUrl, null);
@@ -621,12 +462,12 @@ describe("request func tests", () => {
       });
       strictEqual(true, false);
     } catch (e) {
-      const {name, code, url, redirectedUrl, status, data} = e;
-      strictEqual(status, undefined);
+      const { name, code, url, redirectedUrl, status, data } = e;
       strictEqual(code, "ECONNREFUSED");
       strictEqual(name, "ResponseConnectionRefusedError");
       strictEqual(redirectedUrl, "http://localhost:6364/hello?format=txt&otherQ=4");
       strictEqual(url, "http://localhost:6363/redirectWithDifferentHostHandler");
+      strictEqual(status, undefined);
       strictEqual(data, undefined);
     }
 
@@ -641,7 +482,7 @@ describe("request func tests", () => {
         socketPath: SOCKET_PATH
       });
       strictEqual(true, false);
-    } catch ({url, redirectedUrl, status, name}) {
+    } catch ({ url, redirectedUrl, status, name }) {
       strictEqual(status, 302);
       strictEqual(name, "ResponseError");
       strictEqual(redirectedUrl, null);
@@ -654,8 +495,7 @@ describe("request func tests", () => {
 
   it('simple get follow redirect with no host', async () => {
 
-    console.log("gads");
-    const {url, redirectedUrl, status, data, locations} = await request({
+    const { url, redirectedUrl, status, data, locations } = await request({
       url: "http://localhost:6363/redirectNoHostHandler",
       method: "get",
       followRedirect: true
@@ -668,4 +508,174 @@ describe("request func tests", () => {
     strictEqual(data, "hello2");
 
   });
+
+
+  it('simple get follow redirect 400', async () => {
+
+    console.log("gads");
+    try {
+      await request({
+        url: "http://localhost:6363/redirect400",
+        method: "get",
+        followRedirect: true
+      }, getLogger("test"));
+      strictEqual(true, false);
+    } catch (e) {
+      strictEqual((e).message, "request ended with status [400]");
+      strictEqual((e).status, 400);
+      strictEqual((e).locations[0], "http://localhost:6363/redirect400");
+      strictEqual((e).locations[1], "http://localhost:6363/400");
+      console.error(e);
+    }
+
+  });
+
+  it('simple get follow redirect loop2', async () => {
+
+    console.log("gads");
+    const { url, redirectedUrl, status, data, locations } = await request({
+      url: "http://localhost:6363/redirectLoop2",
+      method: "get",
+      followRedirect: true
+    }, getLogger("test"));
+    strictEqual(status, 200);
+    strictEqual(redirectedUrl, "http://localhost:6363/hello?format=txt&otherQ=3");
+    strictEqual(locations[0], "http://localhost:6363/redirectLoop2");
+    strictEqual(locations[1], "http://localhost:6363/redirectNoHostHandler");
+    strictEqual(locations[2], redirectedUrl);
+    strictEqual(url, "http://localhost:6363/redirectLoop2");
+    strictEqual(data, "hello2");
+
+  });
+
+  it('simple get follow redirect loop2 with max redirect 2', async () => {
+
+    console.log("gads");
+    const { url, redirectedUrl, status, data, locations } = await request({
+      url: "http://localhost:6363/redirectLoop2",
+      method: "get",
+      followRedirect: true,
+      maxRedirects: 2
+    }, getLogger("test"));
+    strictEqual(status, 200);
+    strictEqual(redirectedUrl, "http://localhost:6363/hello?format=txt&otherQ=3");
+    strictEqual(locations[0], "http://localhost:6363/redirectLoop2");
+    strictEqual(locations[1], "http://localhost:6363/redirectNoHostHandler");
+    strictEqual(locations[2], redirectedUrl);
+    strictEqual(url, "http://localhost:6363/redirectLoop2");
+    strictEqual(data, "hello2");
+
+  });
+
+  it('simple get follow redirect loop2 with max redirect 1', async () => {
+
+    console.log("gads");
+    try {
+      await request({
+        url: "http://localhost:6363/redirectLoop2",
+        method: "get",
+        followRedirect: true,
+        maxRedirects: 1
+      }, getLogger("test"));
+      strictEqual(true, false);
+    } catch (e) {
+      strictEqual((e).message.indexOf("too many redirects to"), 0);
+      console.error(e);
+    }
+
+  });
+
+  it('simple get follow redirect max redirects', async () => {
+
+    try {
+      console.log("gads");
+      const { url, redirectedUrl, status, data } = await request({
+        url: "/redirect",
+        method: "get",
+        socketPath: SOCKET_PATH,
+        followRedirect: true,
+        maxRedirects: 1
+      });
+      strictEqual(status, 200);
+      strictEqual(redirectedUrl, "http://localhost:6363/hello?format=txt&otherQ=2");
+      strictEqual(url, "/redirect");
+      strictEqual(data, "hello2");
+    } catch (e) {
+      console.error(e);
+      throw e;
+    }
+
+  });
+
+  it('simple get follow redirect max redirects fails', async () => {
+
+    try {
+      console.log("gads");
+      const { url, redirectedUrl, status, data } = await request({
+        url: "/redirect",
+        method: "get",
+        socketPath: SOCKET_PATH,
+        followRedirect: true,
+        maxRedirects: 0,
+        disableThrow: true
+      }, getLogger("test"));
+      strictEqual(true, false);
+    } catch (e) {
+      strictEqual((e).message.indexOf("too many redirects to"), 0);
+      console.error(e);
+    }
+
+  });
+
+  it('simple get follow redirect loop', async () => {
+
+    try {
+      console.log("gads");
+      const { url, redirectedUrl, status, data } = await request({
+        url: "http://localhost:6363/redirectLoop",
+        method: "get",
+        followRedirect: true,
+        disableThrow: true
+      }, getLogger("test"));
+      strictEqual(true, false);
+    } catch (e) {
+      strictEqual((e).message.indexOf("loop redirect to"), 0);
+      console.error(e);
+    }
+
+  });
+
+  it('timeout ', async () => {
+
+    try {
+      await request({
+        url: "http://localhost:6363/timeout",
+        method: "POST",
+        timeout: 2000
+      }, getLogger("test"));
+      strictEqual(false, true);
+    } catch (e) {
+      strictEqual((e).message, "Response Timeout");
+    }
+
+  });
+
+  it('readtimeout ', async () => {
+
+    try {
+      const ret = await request({
+        url: "http://localhost:6363/readtimeout",
+        method: "POST",
+        timeout: 2000
+      }, getLogger("test"));
+      console.dir(ret);
+      strictEqual(false, true);
+    } catch (e) {
+      console.dir(e);
+      strictEqual((e).message, "Response Timeout");
+    }
+
+  });
+
+
 });
