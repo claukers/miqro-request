@@ -3,7 +3,7 @@ import {
   RequestOptions,
   RequestResponse,
   ResponseError
-} from "./common.js";
+} from "./interfaces.js";
 import { CONTENT_TYPE_HEADER, JSON_TYPE, TEXT_TYPE, DEFAULT_USER_AGENT } from "./constants.js";
 import { asyncRequest, followRedirect, parseData, parseRedirectLocation, readResponseBuffer } from "./utils.js";
 import { gunzipSync } from "zlib";

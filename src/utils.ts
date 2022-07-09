@@ -1,6 +1,6 @@
 import { ClientRequest, IncomingMessage, request as httpRequest } from "http";
 import { request as httpsRequest } from "https";
-import { ParsedRedirectLocation, RequestLogger, RequestOptions, ResponseError } from "./common.js";
+import { ParsedRedirectLocation, RequestLogger, RequestOptions, ResponseError } from "./interfaces.js";
 import { DEFAULT_USER_AGENT } from "./constants.js";
 import { newURL, newURLSearchParams } from "./helpers.js";
 import { request } from "./request.js";
