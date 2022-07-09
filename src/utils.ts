@@ -1,7 +1,7 @@
 import { IncomingMessage } from "http";
 import { ParsedRedirectLocation, RequestOptions, ResponseError } from "./common.js";
 import { newURL, newURLSearchParams } from "./helpers.js";
-import { request } from "./index.js";
+import { request } from "./request.js";
 
 export function parseRedirectLocation(url: string, extraQuery?: { [key: string]: string | string[] | number | boolean | number[] | boolean[] }, socketPath?: string): ParsedRedirectLocation {
   const ret = (urlO: URL, url: string, ignoreHostPort?: boolean) => {
