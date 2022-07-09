@@ -1,7 +1,90 @@
-import { IncomingMessage } from "http";
-import { ParsedRedirectLocation, RequestOptions, ResponseError } from "./common.js";
+import { ClientRequest, IncomingMessage, request as httpRequest } from "http";
+import { request as httpsRequest } from "https";
+import { ParsedRedirectLocation, RequestLogger, RequestOptions, ResponseError } from "./common.js";
+import { DEFAULT_USER_AGENT } from "./constants.js";
 import { newURL, newURLSearchParams } from "./helpers.js";
 import { request } from "./request.js";
+
+export interface AsyncRequestResult {
+  req: ClientRequest;
+  res: IncomingMessage
+}
+
+function asyncRequestErrorHandler(err: any): any {
+  if (err.code === "ECONNREFUSED") {
+    err.name = "ResponseConnectionRefusedError";
+  }
+  return err;
+}
+
+export async function asyncRequest({
+  parsed,
+  options,
+  data,
+  contentLength,
+  logger
+}: { data: any; parsed: ParsedRedirectLocation, options: RequestOptions, contentLength: number, logger?: RequestLogger }): Promise<AsyncRequestResult> {
+  return new Promise<AsyncRequestResult>((resolve, reject) => {
+    try {
+      const readTimeout = options.timeout ? setTimeout(() => {
+        try {
+          req.end(() => {
+            try {
+              req.destroy();
+            } catch (e) {
+              logger?.error(e);
+            }
+            reject(new Error(`Response Timeout`));
+            return;
+          });
+        } catch (e) {
+          reject(e);
+        }
+      }, options.timeout) : null;
+      const httpRequestOptions = {
+        agent: false,
+        path: `${parsed.pathname}${parsed.queryStr ? `?${parsed.queryStr}` : ""}${parsed.hash ? parsed.hash : ""}`,
+        method: options.method,
+        rejectUnauthorized: options.rejectUnauthorized,
+        socketPath: options.socketPath,
+        headers: options.disableUserAgent ? {
+          ["Content-Length"]: contentLength,
+          ...options.headers
+        } : {
+          ["User-Agent"]: DEFAULT_USER_AGENT,
+          ["Content-Length"]: contentLength,
+          ...options.headers
+        },
+        timeout: options.timeout,
+        hostname: parsed.hostname,
+        port: parsed.port
+      };
+
+      const isHttps = parsed.protocol === "https:";
+      logger?.debug("options [%o]", httpRequestOptions);
+      logger?.debug("isHttps [%s]", isHttps);
+
+      const httpModule = (isHttps ? httpsRequest : httpRequest);
+
+      const req: ClientRequest = httpModule(httpRequestOptions, function httpRequestListener(res) {
+        if (readTimeout) {
+          clearTimeout(readTimeout);
+        }
+        resolve({
+          res,
+          req
+        });
+      });
+      req.on("error", function (err: any) {
+        reject(asyncRequestErrorHandler(err));
+      });
+      req.end(data);
+    } catch (e: any) {
+      reject(asyncRequestErrorHandler(e));
+    }
+  });
+
+}
 
 export function parseRedirectLocation(url: string, extraQuery?: { [key: string]: string | string[] | number | boolean | number[] | boolean[] }, socketPath?: string): ParsedRedirectLocation {
   const ret = (urlO: URL, url: string, ignoreHostPort?: boolean) => {
@@ -59,10 +142,7 @@ export async function followRedirect({ status, logger, location, options, parsed
   status: number;
   parsed: ParsedRedirectLocation;
   options: RequestOptions,
-  logger?: {
-    error: (...args: any) => void;
-    debug: (...args: any) => void;
-  }
+  logger?: RequestLogger
 }) {
   // parse location and add query data from current location
   const locationData = parseRedirectLocation(location, options.query, options.socketPath);
@@ -135,9 +215,7 @@ export async function readResponseBuffer({
 }: {
   res: IncomingMessage;
   options: RequestOptions,
-  logger?: {
-    error: (...args: any) => void;
-  } | Console;
+  logger?: RequestLogger
 }): Promise<Buffer> {
   return new Promise<Buffer>((resolve, reject) => {
     try {

@@ -1,5 +1,10 @@
 import { IncomingHttpHeaders, OutgoingHttpHeaders } from "http";
 
+export type RequestLogger = {
+  error: (...args: any) => void;
+  debug: (...args: any) => void;
+} | Console;
+
 export interface ParsedRedirectLocation {
   protocol?: string;
   queryStr: string;
