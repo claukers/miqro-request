@@ -273,7 +273,10 @@ export async function followRedirect({ status, logger, location, options, parsed
 
 export function parseData(contentType: string | undefined, responseBuffer: Buffer) {
   if (contentType && (contentType.indexOf("json") !== -1)) {
-    return JSON.parse(responseBuffer.toString());
+    const str = responseBuffer.toString();
+    if (str) {
+      return JSON.parse(responseBuffer.toString());
+    }
   } else if (contentType && (contentType.indexOf("text") !== -1)) {
     return responseBuffer.toString();
   } else {
