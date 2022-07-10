@@ -1,13 +1,62 @@
-import { ClientRequest, IncomingMessage, request as httpRequest } from "http";
+import { ClientRequest, IncomingMessage, OutgoingHttpHeaders, request as httpRequest } from "http";
 import { request as httpsRequest } from "https";
 import { ParsedRedirectLocation, RequestLogger, RequestOptions, ResponseError } from "./interfaces.js";
-import { DEFAULT_USER_AGENT } from "./constants.js";
+import { CONTENT_TYPE_HEADER, DEFAULT_USER_AGENT, JSON_TYPE, TEXT_TYPE } from "./constants.js";
 import { newURL, newURLSearchParams } from "./helpers.js";
 import { request } from "./request.js";
+
+export interface GetRequestDataArgs {
+  headers?: OutgoingHttpHeaders;
+  data?: any;
+  maxRedirects?: number;
+}
+
+export function getRequestBody(options: GetRequestDataArgs): {
+  data: any;
+  headers: OutgoingHttpHeaders;
+  contentLength: number;
+} {
+  const headers: OutgoingHttpHeaders = options.headers ? { ...options.headers } : Object.create(null) as {};
+
+  const contentType = headers[CONTENT_TYPE_HEADER] || headers[CONTENT_TYPE_HEADER.toLowerCase()] || undefined || headers[CONTENT_TYPE_HEADER.toUpperCase()];
+  const isJSONType = contentType ? contentType.toString().toLocaleLowerCase().indexOf("application/json") === 0 : undefined;
+
+  const noType = !contentType;
+  const isBuffer: boolean = options.data instanceof Buffer;
+  const isText: boolean = typeof options.data === "string";
+  const JsonStringify: boolean = (!isBuffer && !isText && (noType || isJSONType as boolean));
+
+  if (JsonStringify && noType) {
+    headers["Content-Type"] = JSON_TYPE;
+  } else if (isText && noType) {
+    headers["Content-Type"] = TEXT_TYPE;
+  }
+  const data = options.data ? JsonStringify ? JSON.stringify(options.data) : options.data : undefined;
+  const contentLength = data ? Buffer.from(data).length : 0;
+
+  return {
+    data, contentLength,
+    headers
+  };
+}
 
 export interface AsyncRequestResult {
   req: ClientRequest;
   res: IncomingMessage
+}
+
+export interface AsyncRequestArgs {
+  rejectUnauthorized?: boolean;
+  method?: string;
+  timeout?: number;
+  signal?: AbortSignal;
+  data: any;
+  headers: OutgoingHttpHeaders;
+  parsed: ParsedRedirectLocation;
+  contentLength: number;
+  socketPath?: string;
+  disableUserAgent?: boolean;
+  logger?: RequestLogger;
 }
 
 function asyncRequestErrorHandler(err: any): any {
@@ -19,14 +68,23 @@ function asyncRequestErrorHandler(err: any): any {
 
 export async function asyncRequest({
   parsed,
-  options,
+  method,
+  rejectUnauthorized,
+  timeout,
   data,
+  signal,
+  headers,
+  socketPath,
+  disableUserAgent,
   contentLength,
   logger
-}: { data: any; parsed: ParsedRedirectLocation, options: RequestOptions, contentLength: number, logger?: RequestLogger }): Promise<AsyncRequestResult> {
+}: AsyncRequestArgs): Promise<AsyncRequestResult> {
+  if (signal?.aborted) {
+    throw new Error("aborted");
+  }
   return new Promise<AsyncRequestResult>((resolve, reject) => {
     try {
-      const readTimeout = options.timeout ? setTimeout(() => {
+      const readTimeout = timeout ? setTimeout(() => {
         try {
           req.end(() => {
             try {
@@ -40,22 +98,22 @@ export async function asyncRequest({
         } catch (e) {
           reject(e);
         }
-      }, options.timeout) : null;
+      }, timeout) : null;
       const httpRequestOptions = {
         agent: false,
         path: `${parsed.pathname}${parsed.queryStr ? `?${parsed.queryStr}` : ""}${parsed.hash ? parsed.hash : ""}`,
-        method: options.method,
-        rejectUnauthorized: options.rejectUnauthorized,
-        socketPath: options.socketPath,
-        headers: options.disableUserAgent ? {
+        method,
+        rejectUnauthorized: rejectUnauthorized,
+        socketPath,
+        headers: disableUserAgent ? {
           ["Content-Length"]: contentLength,
-          ...options.headers
+          ...headers
         } : {
           ["User-Agent"]: DEFAULT_USER_AGENT,
           ["Content-Length"]: contentLength,
-          ...options.headers
+          ...headers
         },
-        timeout: options.timeout,
+        timeout,
         hostname: parsed.hostname,
         port: parsed.port
       };
@@ -66,9 +124,19 @@ export async function asyncRequest({
 
       const httpModule = (isHttps ? httpsRequest : httpRequest);
 
+      if (signal?.aborted) {
+        if (readTimeout) {
+          clearTimeout(readTimeout);
+        }
+        throw new Error("aborted");
+      }
+
       const req: ClientRequest = httpModule(httpRequestOptions, function httpRequestListener(res) {
         if (readTimeout) {
           clearTimeout(readTimeout);
+        }
+        if (signal?.aborted) {
+          throw new Error("aborted");
         }
         resolve({
           res,
@@ -79,11 +147,16 @@ export async function asyncRequest({
         reject(asyncRequestErrorHandler(err));
       });
       req.end(data);
+      if (signal?.aborted) {
+        if (readTimeout) {
+          clearTimeout(readTimeout);
+        }
+        throw new Error("aborted");
+      }
     } catch (e: any) {
       reject(asyncRequestErrorHandler(e));
     }
   });
-
 }
 
 export function parseRedirectLocation(url: string, extraQuery?: { [key: string]: string | string[] | number | boolean | number[] | boolean[] }, socketPath?: string): ParsedRedirectLocation {
@@ -210,32 +283,34 @@ export function parseData(contentType: string | undefined, responseBuffer: Buffe
 
 export async function readResponseBuffer({
   res,
-  options,
+  timeout,
+  maxResponse,
   logger
 }: {
+  maxResponse?: number;
+  timeout?: number;
   res: IncomingMessage;
-  options: RequestOptions,
   logger?: RequestLogger
 }): Promise<Buffer> {
   return new Promise<Buffer>((resolve, reject) => {
     try {
       const buffers: Buffer[] = [];
 
-      const responseTimeout = options.timeout ? setTimeout(() => {
+      const responseTimeout = timeout ? setTimeout(() => {
         res.removeListener("data", chunkListener);
         res.removeListener("error", errorListener)
         res.removeListener("end", endListener);
         reject(new Error("Response Timeout"));
-      }, options.timeout) : null;
+      }, timeout) : null;
 
       let responseLength = 0;
       const chunkListener = (chunk: Buffer) => {
         responseLength += chunk.length;
-        if (options.maxResponse && options.maxResponse < responseLength) {
+        if (maxResponse && maxResponse < responseLength) {
           res.removeListener("data", chunkListener);
           res.removeListener("error", errorListener)
           res.removeListener("end", endListener);
-          reject(new Error(`response too big maxResponse ${options.maxResponse} < ${responseLength}`));
+          reject(new Error(`response too big maxResponse ${maxResponse} < ${responseLength}`));
         } else {
           buffers.push(chunk);
         }

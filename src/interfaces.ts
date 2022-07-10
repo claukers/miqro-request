@@ -47,6 +47,7 @@ export interface RequestOptions {
   disableThrow?: boolean;
   headers?: OutgoingHttpHeaders;
   data?: any;
+  signal?: AbortSignal;
 }
 
 export interface RequestResponse {
